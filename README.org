@@ -1,3 +1,4 @@
-#+TITLE: Custom emacs configuration files
+
+* Custom emacs configuration files
 
 Just some emacs configuration files. Tested with emacs 24.1.1.
