@@ -17,6 +17,7 @@ import XMonad.Hooks.ManageDocks
 import XMonad.Hooks.EwmhDesktops
 
 import XMonad.Layout.Maximize
+import XMonad.Layout.PerWorkspace
 
 
 -- The preferred terminal program, which is used in a binding below and by
@@ -189,23 +190,22 @@ myMouseBindings (XConfig {XMonad.modMask = modMask}) = M.fromList $
 -- restarting (with 'mod-q') to reset your layout state to the new
 -- defaults, as xmonad preserves your old layout settings by default.
 --
--- The available layouts. Note that each layout is separated by |||,
--- which denotes layout choice.
---
-myLayout = maximize (tiled) ||| Mirror tiled ||| Full
+-- Layouts are defined by workspaces.
+
+-- Default
+myDefaultLayout = maximize (tiled) ||| Mirror tiled ||| Full
   where
-     -- default tiling algorithm partitions the screen into two panes
-     tiled = Tall nmaster delta ratio
+     tiled = Tall 1 (3/100) (1/2)
 
-     -- The default number of windows in the master pane
-     nmaster = 1
+devLayout = maximize $ Tall 1 (1/100) (2/3)
 
-     -- Default proportion of screen occupied by master pane
-     ratio = 1/2
-
-     -- Percent of screen to increment by when resizing panes
-     delta = 3/100
-
+webLayout = maximize (tiled) ||| Mirror tiled ||| Full
+  where
+    tiled = Tall 1 (3/100) (4/5)
+    
+-- All layouts together
+myLayout = onWorkspace "dev" devLayout $ onWorkspace "web" webLayout $ 
+           myDefaultLayout 
 
 ------------------------------------------------------------------------
 -- Window rules:
@@ -224,6 +224,7 @@ myLayout = maximize (tiled) ||| Mirror tiled ||| Full
 --
 myManageHook = composeAll
     [ className =? "Firefox" --> doShift "web" 
+    , className =? "Turpial" --> doShift "web"
     , className =? "MPlayer" --> doFloat
     , className =? "Gimp" --> doFloat
     , className =? "Xfce4-appfinder" --> doFloat
@@ -288,8 +289,7 @@ defaults = defaultConfig {
         mouseBindings = myMouseBindings,
 
       -- hooks, layouts
-        --layoutHook = ewmhDesktopsLayout $ avoidStruts $ myLayout,
-        layoutHook = avoidStruts $ layoutHook defaultConfig,
+        layoutHook = avoidStruts $ myLayout,
         manageHook = manageDocks <+> myManageHook,
         logHook = ewmhDesktopsLogHook,
         startupHook = myStartupHook,
