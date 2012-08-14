@@ -1,4 +1,7 @@
 
-* Custom emacs configuration files
+* Personal Linux configuration files
 
-Just some emacs configuration files. Tested with emacs 24.1.1.
+The configuration files I use at my different systems. Contents:
+
+  - .emacs.d :: Emacs configuration, themes. Tested with Emacs 24.1.1
+  - .xmonad :: xmonad configuration
