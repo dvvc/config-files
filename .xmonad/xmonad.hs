@@ -59,7 +59,7 @@ myNumlockMask = mod2Mask
 --
 -- > workspaces = ["web", "irc", "code" ] ++ map show [4..9]
 --
-myWorkspaces = ["web","dev","3","4","5","6","7","8","9"]
+myWorkspaces = ["dev","web","mail","agenda","5","6","7","8","9"]
 
 -- Border colors for unfocused and focused windows, respectively.
 --
@@ -223,7 +223,8 @@ myLayout = maximize (tiled) ||| Mirror tiled ||| Full
 -- 'className' and 'resource' are used below.
 --
 myManageHook = composeAll
-    [ className =? "MPlayer" --> doFloat
+    [ className =? "Firefox" --> doShift "web" 
+    , className =? "MPlayer" --> doFloat
     , className =? "Gimp" --> doFloat
     , className =? "Xfce4-appfinder" --> doFloat
     , className =? "Xfrun4" --> doFloat
