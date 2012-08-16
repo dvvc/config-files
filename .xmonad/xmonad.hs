@@ -60,7 +60,7 @@ myNumlockMask = mod2Mask
 --
 -- > workspaces = ["web", "irc", "code" ] ++ map show [4..9]
 --
-myWorkspaces = ["dev","web","mail","agenda","5","6","7","8","9"]
+myWorkspaces = ["dev","web","mail","agenda","dev-extra","6","7","8","9"]
 
 -- Border colors for unfocused and focused windows, respectively.
 --
@@ -70,6 +70,8 @@ myFocusedBorderColor = "#ff0000"
 ------------------------------------------------------------------------
 -- Key bindings. Add, modify or remove key bindings here.
 --
+myEmacsTodo = "emacsclient -F '((title . \"TODO\"))' -c -e '(org-agenda nil \"t\")'"
+
 myKeys conf@(XConfig {XMonad.modMask = modMask}) = M.fromList $
 
     -- launch a terminal
@@ -125,7 +127,10 @@ myKeys conf@(XConfig {XMonad.modMask = modMask}) = M.fromList $
 
     -- Push window back into tiling
     , ((modMask, xK_t ), withFocused $ windows . W.sink)
-
+      
+    -- Launch a emacs client with *TODO* buffer
+    , ((modMask .|. shiftMask, xK_t), spawn myEmacsTodo)
+                                      
     -- Increment the number of windows in the master area
     , ((modMask , xK_comma ), sendMessage (IncMasterN 1))
 
@@ -225,12 +230,16 @@ myLayout = onWorkspace "dev" devLayout $ onWorkspace "web" webLayout $
 myManageHook = composeAll
     [ className =? "Firefox" --> doShift "web" 
     , className =? "Turpial" --> doShift "web"
+    , className =? "Pidgin" --> doShift "web"
+    , title =? "TODO" --> doShift "dev"
+    , className =? "Claws-mail" --> doShift "mail"
     , className =? "MPlayer" --> doFloat
     , className =? "Gimp" --> doFloat
     , className =? "Xfce4-appfinder" --> doFloat
     , className =? "Xfrun4" --> doFloat
     , resource =? "desktop_window" --> doIgnore
-    , resource =? "kdesktop" --> doIgnore ]
+    , resource =? "kdesktop" --> doIgnore 
+    ]
 
 -- Whether focus follows the mouse pointer.
 myFocusFollowsMouse :: Bool
