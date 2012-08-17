@@ -23,7 +23,7 @@ import XMonad.Layout.PerWorkspace
 -- The preferred terminal program, which is used in a binding below and by
 -- certain contrib modules.
 --
-myTerminal = "gnome-terminal"
+myTerminal = "xfce4-terminal"
 
 -- Width of the window border in pixels.
 --
