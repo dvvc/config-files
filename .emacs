@@ -101,7 +101,7 @@
 
 ;; Capture templates
 (setq org-capture-templates
- 	  '(("t" "Todo" entry (file+headline "" "Tasks")
+ 	  '(("t" "Todo" entry (file+datetree org-my-agenda-file)
  		 "* TODO %?")))
 
 ;; Remove unnecessary gui stuff
