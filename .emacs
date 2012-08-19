@@ -21,6 +21,7 @@
 (global-set-key "\C-cq" 'auto-fill-mode)
 (global-set-key "\C-co" 'next-multiframe-window)
 (global-set-key "\C-cx" 'org-publish-project)
+(global-set-key "\C-cw" 'whitespace-mode)
 
 (define-key global-map "\C-ca" 'org-agenda)
 
@@ -33,7 +34,8 @@
 		  (interactive)
 		  (shell-command "nosetests")))))
 	     
-
+;; Set auto-fill-mode for different programming modes
+(add-hook 'python-mode-hook 'auto-fill-mode)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;  Other customizations
