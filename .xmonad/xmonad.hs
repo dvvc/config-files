@@ -232,6 +232,7 @@ myManageHook = composeAll
     , className =? "Turpial" --> doShift "web"
     , className =? "Pidgin" --> doShift "web"
     , title =? "TODO" --> doShift "dev"
+    , className =? "Xfce4-notes" --> doFloat
     , className =? "Claws-mail" --> doShift "mail"
     , className =? "MPlayer" --> doFloat
     , className =? "Gimp" --> doFloat
