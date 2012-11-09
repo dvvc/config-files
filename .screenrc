@@ -1,0 +1,16 @@
+escape ^Oo
+
+## do not trash BackSpace, usually DEL
+bindkey -k kb
+bindkey -d -k kb
+
+## do not trash Delete, usually ESC [ 3 ~
+bindkey -k kD
+bindkey -d -k kD
+
+defscrollback 10000
+
+startup_message off
+
+hardstatus alwayslastline
+hardstatus string '%{= kG}[ %{G}%H %{g}][%= %{= kw}%?%-Lw%?%{r}(%{W}%n*%f%t%?(%u)%?%{r})%{w}%?%+Lw%?%?%= %{g}][%{B} %d/%m %{W}%c %{g}]'

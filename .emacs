@@ -62,6 +62,8 @@
 ; open .m files in octave-mode
 (setq auto-mode-alist (cons '("\\.m$" . octave-mode) auto-mode-alist))
 
+; disable cycling completion for eshell
+(setq eshell-cmpl-cycle-completions nil)
 
 ;;;;;;;;;;;;;;;;;;;;;;
 ;;; Org mode
