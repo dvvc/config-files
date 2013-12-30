@@ -3,5 +3,6 @@
 
 The configuration files I use at my different systems. Contents:
 
-  - .emacs.d :: Emacs configuration, themes. Tested with Emacs 24.1.1
+  - .emacs :: Emacs configuration. Tested with Emacs 24.3.1
   - .xmonad :: xmonad configuration
+  - .screenrc :: screen configuration
