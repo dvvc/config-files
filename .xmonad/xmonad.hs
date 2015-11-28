@@ -18,7 +18,16 @@ import XMonad.Hooks.EwmhDesktops
 
 import XMonad.Layout.Maximize
 import XMonad.Layout.PerWorkspace
-
+import XMonad.Layout.ThreeColumns
+import XMonad.Layout.Accordion
+import XMonad.Layout.Grid
+import XMonad.Layout.IM
+import XMonad.Layout.Tabbed
+import XMonad.Layout.TrackFloating
+import XMonad.Layout.Reflect
+import XMonad.Layout.Spiral
+import XMonad.Layout.Spacing
+import XMonad.Layout.ResizableTile
 
 -- The preferred terminal program, which is used in a binding below and by
 -- certain contrib modules.
@@ -27,7 +36,7 @@ myTerminal = "xfce4-terminal"
 
 -- Width of the window border in pixels.
 --
-myBorderWidth = 1
+myBorderWidth = 4
 
 -- modMask lets you specify which modkey you want to use. The default
 -- is mod1Mask ("left alt"). You may also consider using mod3Mask
@@ -51,6 +60,9 @@ myModMask = mod4Mask
 --
 myNumlockMask = mod2Mask
 
+-- Whether a mouse click select the focus or is just passed to the window
+myClickJustFocuses = False
+
 -- The default number of workspaces (virtual screens) and their names.
 -- By default we use numeric strings, but any string may be used as a
 -- workspace name. The number of workspaces is determined by the length
@@ -60,7 +72,7 @@ myNumlockMask = mod2Mask
 --
 -- > workspaces = ["web", "irc", "code" ] ++ map show [4..9]
 --
-myWorkspaces = ["dev","web","mail","agenda","dev-extra","6","7","8","9"]
+myWorkspaces = ["dev","web","present","gimp","dev-extra","6","7","8","9"]
 
 -- Border colors for unfocused and focused windows, respectively.
 --
@@ -81,10 +93,13 @@ myKeys conf@(XConfig {XMonad.modMask = modMask}) = M.fromList $
     , ((modMask, xK_d ), spawn "exe=`dmenu_path | dmenu` && eval \"exec $exe\"")
 
     -- launch xfce4-launcher
-    , ((modMask, xK_p ), spawn "xfrun4")
+    , ((modMask, xK_p ), spawn "dmenu_run -b")
 
     -- launch gmrun
     , ((modMask .|. shiftMask, xK_p ), spawn "xfce4-appfinder")
+
+    -- take a screenshot
+    , ((modMask, xK_Print ), spawn "xfce4-screenshooter -s ~/Pictures/screenshots")
 
     -- close focused window
     , ((modMask .|. shiftMask, xK_c ), kill)
@@ -100,9 +115,11 @@ myKeys conf@(XConfig {XMonad.modMask = modMask}) = M.fromList $
 
     -- Move focus to the next window
     , ((modMask, xK_Tab ), windows W.focusDown)
+    , ((modMask, xK_j ), windows W.focusDown)
 
       -- Move focus to the previous window
     , ((modMask .|. shiftMask, xK_Tab ), windows W.focusUp)
+    , ((modMask, xK_k ), windows W.focusUp)
 
     -- Move focus to the master window
     , ((modMask .|. shiftMask, xK_m ), windows W.focusMaster )
@@ -120,17 +137,23 @@ myKeys conf@(XConfig {XMonad.modMask = modMask}) = M.fromList $
     , ((modMask .|. shiftMask, xK_k ), windows W.swapUp )
 
     -- Shrink the master area
-    , ((modMask, xK_h ), sendMessage Shrink)
+    , ((modMask, xK_Left ), sendMessage Shrink)
 
     -- Expand the master area
-    , ((modMask, xK_l ), sendMessage Expand)
+    , ((modMask, xK_Right ), sendMessage Expand)
+
+    -- Shrink for ResizableTall
+    , ((modMask, xK_Down), sendMessage MirrorShrink)
+
+    -- Expand for ResizableTall
+    , ((modMask, xK_Up), sendMessage MirrorExpand)
 
     -- Push window back into tiling
     , ((modMask, xK_t ), withFocused $ windows . W.sink)
-      
+
     -- Launch a emacs client with *TODO* buffer
     , ((modMask .|. shiftMask, xK_t), spawn myEmacsTodo)
-                                      
+
     -- Increment the number of windows in the master area
     , ((modMask , xK_comma ), sendMessage (IncMasterN 1))
 
@@ -140,13 +163,16 @@ myKeys conf@(XConfig {XMonad.modMask = modMask}) = M.fromList $
     -- toggle the status bar gap
     -- TODO, update this binding with avoidStruts , ((modMask , xK_b ),
 
+    -- Lock screen
+    , ((modMask .|. shiftMask, xK_l), spawn "xflock4")
+
     -- Quit xmonad
     --, ((modMask .|. shiftMask, xK_q ), io (exitWith ExitSuccess))
     , ((modMask .|. shiftMask, xK_q ), spawn "xfce4-session-logout")
 
     -- Restart xmonad
     , ((modMask , xK_q ), restart "xmonad" True)
-    
+
     -- to hide/unhide the panel
     , ((modMask , xK_b), sendMessage ToggleStruts)
     ]
@@ -200,17 +226,29 @@ myMouseBindings (XConfig {XMonad.modMask = modMask}) = M.fromList $
 -- Default
 myDefaultLayout = maximize (tiled) ||| Mirror tiled ||| Full
   where
-     tiled = Tall 1 (3/100) (1/2)
+     tiled = ResizableTall 1 (3/100) (1/2) []
 
-devLayout = maximize $ Tall 1 (1/100) (2/3)
+-- devLayout = maximize $ Tall 1 (1/100) (2/3)
+devLayout = maximize (ThreeColMid 1 (3/100) (1/2)) ||| myDefaultLayout
 
-webLayout = maximize (tiled) ||| Mirror tiled ||| Full
-  where
-    tiled = Tall 1 (3/100) (4/5)
-    
+webLayout = myDefaultLayout
+
+
+gimpLayout = withIM (1/12) (Role "gimp-toolbox") $ reflectHoriz
+             $ withIM (1/12) (Role "gimp-dock") (trackFloating centralLayouts)
+               where
+                 centralLayouts = (simpleTabbed ||| spiral (6/7) ||| Grid)
+
+
+
+presentLayout = maximize (Accordion ||| Grid)
+
 -- All layouts together
-myLayout = onWorkspace "dev" devLayout $ onWorkspace "web" webLayout $ 
-           myDefaultLayout 
+myLayout = onWorkspace "dev" devLayout $
+           onWorkspace "web" webLayout $
+           onWorkspace "present" presentLayout $
+           onWorkspace "gimp" gimpLayout $
+           myDefaultLayout
 
 ------------------------------------------------------------------------
 -- Window rules:
@@ -227,26 +265,23 @@ myLayout = onWorkspace "dev" devLayout $ onWorkspace "web" webLayout $
 -- To match on the WM_NAME, you can use 'title' in the same way that
 -- 'className' and 'resource' are used below.
 --
+-- className =? "Firefox" --> doShift "web"
 myManageHook = composeAll
-    [ className =? "Firefox" --> doShift "web" 
-    , className =? "Turpial" --> doShift "web"
-    , className =? "Pidgin" --> doShift "web"
-    , title =? "TODO" --> doShift "dev"
-    , className =? "Xfce4-notes" --> doFloat
+    [ className =? "Xfce4-notes" --> doFloat
     , className =? "Tk" --> doFloat
     , className =? "xli" --> doFloat
-    , className =? "Claws-mail" --> doShift "mail"
     , className =? "MPlayer" --> doFloat
-    , className =? "Gimp" --> doFloat
+    , className =? "Gimp" --> doShift "gimp"
     , className =? "Xfce4-appfinder" --> doFloat
     , className =? "Xfrun4" --> doFloat
+    , title =? "Ediff" --> doFloat
     , resource =? "desktop_window" --> doIgnore
-    , resource =? "kdesktop" --> doIgnore 
+    , resource =? "kdesktop" --> doIgnore
     ]
 
 -- Whether focus follows the mouse pointer.
 myFocusFollowsMouse :: Bool
-myFocusFollowsMouse = True
+myFocusFollowsMouse = False
 
 
 ------------------------------------------------------------------------
@@ -282,7 +317,7 @@ main = xmonad defaults
 -- A structure containing your configuration settings, overriding
 -- fields in the default config. Any you don't override, will
 -- use the defaults defined in xmonad/XMonad/Config.hs
--- 
+--
 -- No need to modify this.
 --
 defaults = defaultConfig {
@@ -295,6 +330,7 @@ defaults = defaultConfig {
         workspaces = myWorkspaces,
         normalBorderColor = myNormalBorderColor,
         focusedBorderColor = myFocusedBorderColor,
+        clickJustFocuses = myClickJustFocuses,
 
       -- key bindings
         keys = myKeys,
@@ -306,5 +342,6 @@ defaults = defaultConfig {
         logHook = ewmhDesktopsLogHook,
         startupHook = myStartupHook,
         handleEventHook = ewmhDesktopsEventHook
-                      
+
+
     }
