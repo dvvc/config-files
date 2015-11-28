@@ -8,14 +8,19 @@
 	     '("melpa" .
 	       "http://melpa.milkbox.net/packages/") t)
 
+(add-to-list 'load-path "~/.emacs.d/el/")
+(add-to-list 'custom-theme-load-path "~/.emacs.d/themes/")
+
 (package-initialize)
 
 ;; Themes
 (load-theme 'zenburn t)
 
 
+(require 'nodejs-repl)
 (require 'rainbow-mode)
 (require 'uniquify)
+;(require 'project-mode)
 
 ;;;;;;;;;;;;;;;;;;;;;;
 ;;  Custom functions
@@ -31,20 +36,21 @@
 (global-set-key "\C-cq" 'auto-fill-mode)
 (global-set-key "\C-co" 'next-multiframe-window)
 (global-set-key "\C-cw" 'whitespace-mode)
+(global-set-key "\C-cn" 'nodejs-repl)
 
 (define-key global-map "\C-ca" 'org-agenda)
 
 ;; Haskell mode
-(eval-after-load "haskell-mode"
-    '(progn
-       (define-key haskell-mode-map (kbd "C-c C-c") 'haskell-compile)
-       (turn-on-haskell-indent)))
+;;(eval-after-load "haskell-mode"
+;;    '(progn
+;;       (define-key haskell-mode-map (kbd "C-c C-c") 'haskell-compile)
+;;       (turn-on-haskell-indentation)))
 
-(eval-after-load "haskell-cabal"
-    '(define-key haskell-cabal-mode-map (kbd "C-c C-c") 'haskell-compile))
+;;(eval-after-load "haskell-cabal"
+;;    '(define-key haskell-cabal-mode-map (kbd "C-c C-c") 'haskell-compile))
 
-(add-hook 'haskell-mode-hook 'turn-on-haskell-indentation)
-(add-hook 'haskell-mode-hook 'flymake-haskell-multi-load)
+;;(add-hook 'haskell-mode-hook 'turn-on-haskell-indentation)
+;;(add-hook 'haskell-mode-hook 'flymake-haskell-multi-load)
 
 ;; Add a key for running nosetests in python mode
 (add-hook 'python-mode-hook
@@ -72,13 +78,19 @@
 ; Use spaces instead of tabs
 (setq-default indent-tabs-mode nil)
 
+(setq default-tab-width 2)
+(setq tab-width 2)
+(setq js-indent-level 2)
+
+(defvaralias 'c-basic-offset 'tab-width)
+
 ; Move all temporary files elsewhere
 (defvar backup-dir "~/.emacs.d/tempfiles")
 (setq backup-directory-alist (list (cons "." backup-dir)))
 
 ; frame size
 (setq initial-frame-alist
-      '((width . 90) (height . 50)))
+      '((width . 90) (height . 54)))
 
 ; fill-paragraph options
 (setq-default fill-column 80)
@@ -94,6 +106,33 @@
 
 ; remove trailing whitespaces on save
 (add-hook 'before-save-hook 'delete-trailing-whitespace)
+
+;;;;;;;;;;;;;;;;;;;;;;
+;;; Rust mode
+;;;;;;;;;;;;;;;;;;;;;;
+(setq rust-indent-offset 2)
+
+(defun rust-save-compile-run ()
+  (interactive)
+  (save-buffer)
+  (compile "cargo run"))
+
+(defun rust-save-compile-test ()
+  (interactive)
+  (save-buffer)
+  (compile "cargo test"))
+
+
+(add-hook 'rust-mode-hook
+          (lambda ()
+            (define-key
+              rust-mode-map (kbd "C-c C-c") 'rust-save-compile-run)))
+
+(add-hook 'rust-mode-hook
+          (lambda ()
+            (define-key
+              rust-mode-map (kbd "C-c C-t") 'rust-save-compile-test)))
+
 
 ;;;;;;;;;;;;;;;;;;;;;;
 ;;; Java mode
@@ -167,19 +206,25 @@
 ;; Remove unnecessary gui stuff
 (if (fboundp 'scroll-bar-mode) (scroll-bar-mode -1))
 (if (fboundp 'tool-bar-mode) (tool-bar-mode -1))
-(if (fboundp 'menu-bar-mode) (menu-bar-mode 1))
+(if (fboundp 'menu-bar-mode) (menu-bar-mode -1))
 (set-fringe-mode 0)
 
 (custom-set-variables
-  ;; custom-set-variables was added by Custom.
-  ;; If you edit it by hand, you could mess it up, so be careful.
-  ;; Your init file should contain only one such instance.
-  ;; If there is more than one, they won't work right.
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
  '(column-number-mode t)
- '(tab-width 2))
+ '(haskell-mode-hook (quote (turn-on-haskell-indent auto-fill-mode))))
 
 
 (setq eval-expression-debug-on-error t)
 
 (put 'narrow-to-region 'disabled nil)
 (put 'scroll-left 'disabled nil)
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )
